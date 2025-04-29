@@ -11,6 +11,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The type Game service.
+ */
 @Service
 public class GameServiceImpl implements GameService {
 
@@ -20,6 +23,11 @@ public class GameServiceImpl implements GameService {
     private final Logger logger = LoggerFactory.getLogger(GameServiceImpl.class);
     private boolean gameStarted = false;
 
+    /**
+     * Instantiates a new Game service.
+     *
+     * @param diceApiClient the dice api client
+     */
     public GameServiceImpl(DiceApiClient diceApiClient) {
         this.diceApiClient = diceApiClient;
     }

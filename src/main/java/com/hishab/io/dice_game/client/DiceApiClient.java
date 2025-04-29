@@ -34,6 +34,11 @@ public class DiceApiClient {
         this.restTemplate = restTemplate;
     }
 
+    /**
+     * Roll dice int.
+     *
+     * @return the int
+     */
     public int rollDice() {
         try {
             return Optional.ofNullable(restTemplate.getForEntity(upstreamUrl, Integer.class).getBody())
