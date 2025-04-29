@@ -1,13 +1,17 @@
 package com.hishab.io.dice_game.exception;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.HttpStatus;
 
 /**
  * The type Custom exception.
  */
 public class CustomException extends RuntimeException {
+    @Schema(description = "The name of the exception", example = "ConstraintViolationException")
     private final String exceptionName;
+    @Schema(description = "The message of the exception", example = "At least 2 players are required to start the game.")
     private final String message;
+    @Schema(description = "The HTTP status code", example = "400")
     private final HttpStatus httpStatus;
 
     /**

@@ -1,15 +1,22 @@
 package com.hishab.io.dice_game.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Objects;
 
 /**
  * The type Player.
  */
 public class Player {
+    @Schema(description = "The name of the player", example = "Masud Bappy")
     private String name;
+    @Schema(description = "The age of the player", example = "30")
     private int age;
+    @Schema(description = "The current score of the player", example = "25")
     private int score;
+    @Schema(description = "Indicates if the player can play", example = "true")
     private boolean canPlay;
+    @Schema(description = "Indicates if the player has rolled a six", example = "false")
     private boolean firstSixRolled;
 
     /**
@@ -78,6 +85,7 @@ public class Player {
      */
     public void setScore(int score) {
         this.score = score;
+        score = Math.max(0, score); // Ensure score is not negative
     }
 
     /**

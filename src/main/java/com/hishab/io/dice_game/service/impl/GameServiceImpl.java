@@ -9,6 +9,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class GameServiceImpl implements GameService {
                     "Player with this name already exists.", HttpStatus.BAD_REQUEST);
         }
         players.add(player);
-        logger.info("Player created: {}", player.getName());
+        logger.info("Player {} has joined the game.", player.getName());
         return player;
     }
 
@@ -59,12 +60,18 @@ public class GameServiceImpl implements GameService {
             throw new CustomException("ConstraintViolationException",
                     "At least 2 players are required to start the game.", HttpStatus.BAD_REQUEST);
         }
+        if (gameStarted) {
+            throw new CustomException("IllegalStateException",
+                    "Game is already in progress.", HttpStatus.BAD_REQUEST);
+        }
         if (!players.stream().noneMatch(this::hasWon)) {
             throw new CustomException("IllegalStateException",
-                    "Game is already finished. Please start a new game.", HttpStatus.BAD_REQUEST);
+                    "The previous game has already finished. Please reset the game to start a new one.", HttpStatus.BAD_REQUEST);
         }
         gameStarted = true;
+        logger.info("The game has started with {} players.", players.size());
         playGame();
+        logger.info("The game has ended.");
     }
 
     private void playGame() {
@@ -72,37 +79,52 @@ public class GameServiceImpl implements GameService {
         while (players.stream().noneMatch(this::hasWon)) {
             Player currentPlayer = players.get(currentPlayerIndex);
             playTurn(currentPlayer);
+            if (hasWon(currentPlayer)) {
+                logger.info("Player {} has won with a score of {}!", currentPlayer.getName(), currentPlayer.getScore());
+                break;
+            }
             currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
         }
     }
 
     private void playTurn(Player player) {
         int diceValue = diceApiClient.rollDice();
-        logger.info("Player name: {}, Total Score: {}, Current Value of Dice: {}", player.getName(), player.getScore(), diceValue);
+        logger.info("Player {} rolled a {}", player.getName(), diceValue);
 
         if (!player.isCanPlay()) {
             if (diceValue == 6) {
                 player.setCanPlay(true);
-                logger.info("Congratulations! Player {} rolled a 6 and can now play.", player.getName());
+                logger.info("Player {} rolled a 6 and can now start playing.", player.getName());
                 int initialMove = diceApiClient.rollDice();
-                logger.info("Player name: {}, Total Score: {}, Current Value of Dice: {}", player.getName(), player.getScore(), initialMove);
+                logger.info("Player {}'s starting roll is {}", player.getName(), initialMove);
                 if (initialMove != 6) {
                     player.setScore(initialMove);
                     player.setFirstSixRolled(true);
+                    logger.info("Player {}'s score is now {}", player.getName(), player.getScore());
+                } else {
+                    logger.info("Player {} rolled a 6 on the starting roll, score remains 0.", player.getName());
                 }
+            } else {
+                logger.info("Player {} rolled a {} and needs a 6 to start.", player.getName(), diceValue);
             }
         } else {
             if (player.isFirstSixRolled() && diceValue == 4) {
                 player.setScore(player.getScore() - 4);
+                logger.info("Player {} rolled a 4, score reduced to {}", player.getName(), player.getScore());
             } else if (diceValue == 6) {
                 player.setScore(player.getScore() + diceValue);
+                logger.info("Player {} rolled a 6, score increased to {} and gets an extra turn.", player.getName(), player.getScore());
+                if (hasWon(player)) {
+                    return;
+                }
                 playTurn(player); // Extra turn
             } else {
                 player.setScore(player.getScore() + diceValue);
+                logger.info("Player {} rolled a {}, score increased to {}", player.getName(), diceValue, player.getScore());
             }
-            if (diceValue == 6) {
-                player.setFirstSixRolled(true);
-            }
+        }
+        if (diceValue == 6 && !player.isFirstSixRolled() && player.isCanPlay()) {
+            player.setFirstSixRolled(true);
         }
     }
 
@@ -115,6 +137,7 @@ public class GameServiceImpl implements GameService {
     public void resetGame() {
         players.forEach(Player::reset);
         gameStarted = false;
+        logger.info("The game has been reset.");
     }
 
     private PlayerResponse convertToResponse(Player player) {
