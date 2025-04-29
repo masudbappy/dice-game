@@ -2,8 +2,12 @@ package com.hishab.io.dice_game.service.impl;
 
 import com.hishab.io.dice_game.client.DiceApiClient;
 import com.hishab.io.dice_game.dto.PlayerResponse;
+import com.hishab.io.dice_game.exception.CustomException;
 import com.hishab.io.dice_game.model.Player;
 import com.hishab.io.dice_game.service.GameService;
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +21,8 @@ import org.slf4j.LoggerFactory;
 @Service
 public class GameServiceImpl implements GameService {
 
-    private static final int WINNING_SCORE = 25;
+    @Value("${dice.game.winning-score}")
+    private int winningScore;
     private final List<Player> players = new ArrayList<>();
     private final DiceApiClient diceApiClient;
     private final Logger logger = LoggerFactory.getLogger(GameServiceImpl.class);
@@ -35,23 +40,28 @@ public class GameServiceImpl implements GameService {
     @Override
     public Player createPlayer(String name, int age) {
         if (players.size() >= 4) {
-            throw new IllegalStateException("Maximum 4 players are allowed.");
+            throw new CustomException("ConstraintViolationException",
+                    "Maximum 4 players are allowed.", HttpStatus.BAD_REQUEST);
         }
         Player player = new Player(name, age);
         if (players.contains(player)) {
-            throw new IllegalStateException("Player with this name already exists.");
+            throw new CustomException("IllegalStateException",
+                    "Player with this name already exists.", HttpStatus.BAD_REQUEST);
         }
         players.add(player);
+        logger.info("Player created: {}", player.getName());
         return player;
     }
 
     @Override
     public void startGame() {
         if (players.size() < 2) {
-            throw new IllegalStateException("At least 2 players are required to start the game.");
+            throw new CustomException("ConstraintViolationException",
+                    "At least 2 players are required to start the game.", HttpStatus.BAD_REQUEST);
         }
         if (!players.stream().noneMatch(this::hasWon)) {
-            throw new IllegalStateException("Game is already finished. Please start a new game.");
+            throw new CustomException("IllegalStateException",
+                    "Game is already finished. Please start a new game.", HttpStatus.BAD_REQUEST);
         }
         gameStarted = true;
         playGame();
@@ -73,6 +83,7 @@ public class GameServiceImpl implements GameService {
         if (!player.isCanPlay()) {
             if (diceValue == 6) {
                 player.setCanPlay(true);
+                logger.info("Congratulations! Player {} rolled a 6 and can now play.", player.getName());
                 int initialMove = diceApiClient.rollDice();
                 logger.info("Player name: {}, Total Score: {}, Current Value of Dice: {}", player.getName(), player.getScore(), initialMove);
                 if (initialMove != 6) {
@@ -114,6 +125,6 @@ public class GameServiceImpl implements GameService {
     }
 
     private boolean hasWon(Player player) {
-        return player.getScore() >= WINNING_SCORE;
+        return player.getScore() >= winningScore;
     }
 }
