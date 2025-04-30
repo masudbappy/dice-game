@@ -18,13 +18,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The type Player controller.
  */
 @RestController
-@RequestMapping("/api/players")
-public class PlayerController {
+@RequestMapping("/api/v1/dice")
+public class GameController {
 
     private final GameService gameService;
 
@@ -33,7 +34,7 @@ public class PlayerController {
      *
      * @param gameService the game service
      */
-    public PlayerController(GameService gameService) {
+    public GameController(GameService gameService) {
         this.gameService = gameService;
     }
 
@@ -50,7 +51,7 @@ public class PlayerController {
             @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
-    @PostMapping
+    @PostMapping("/create/player")
     public ResponseEntity<PlayerResponse> createPlayer(@Valid @RequestBody PlayerRequest playerRequest) {
         Player player = gameService.createPlayer(playerRequest.name(), playerRequest.age());
         PlayerResponse playerResponse = new PlayerResponse(player.getName(), player.getScore());
@@ -64,17 +65,19 @@ public class PlayerController {
      */
     @Operation(summary = "Start the game")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Game started successfully"),
+            @ApiResponse(responseCode = "200", description = "Game started successfully",
+                    content = @Content(schema = @Schema(implementation = Map.class))),
             @ApiResponse(responseCode = "400", description = "Bad request - Not enough players",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     @PostMapping("/start")
-    public ResponseEntity<String> startGame() {
+    public ResponseEntity<Map<String, Object>> startGame() {
         try {
-            gameService.startGame();
-            return ResponseEntity.ok("Game started successfully!");
+            Map<String, Object> response = gameService.startGame();
+            return ResponseEntity.ok(response);
         } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            throw new CustomException("GamePlayException",
+                    "Failed to start game", HttpStatus.BAD_REQUEST);
         }
     }
 

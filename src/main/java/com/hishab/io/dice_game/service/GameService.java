@@ -4,6 +4,7 @@ import com.hishab.io.dice_game.dto.PlayerResponse;
 import com.hishab.io.dice_game.model.Player;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The interface Game service.
@@ -20,8 +21,10 @@ public interface GameService {
 
     /**
      * Start game.
+     *
+     * @return
      */
-    void startGame();
+    Map<String, Object> startGame();
 
     /**
      * Gets current scores.

@@ -5,13 +5,13 @@ import com.hishab.io.dice_game.dto.PlayerResponse;
 import com.hishab.io.dice_game.exception.CustomException;
 import com.hishab.io.dice_game.model.Player;
 import com.hishab.io.dice_game.service.GameService;
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +55,7 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public void startGame() {
+    public Map<String, Object> startGame() {
         if (players.size() < 2) {
             throw new CustomException("ConstraintViolationException",
                     "At least 2 players are required to start the game.", HttpStatus.BAD_REQUEST);
@@ -72,6 +72,12 @@ public class GameServiceImpl implements GameService {
         logger.info("The game has started with {} players.", players.size());
         playGame();
         logger.info("The game has ended.");
+        return Map.of("winner", players.stream()
+                .filter(this::hasWon)
+                .findFirst()
+                .orElseThrow(() -> new CustomException("IllegalStateException",
+                        "No winner found.", HttpStatus.BAD_REQUEST))
+                .getName(), "scores", getCurrentScores());
     }
 
     private void playGame() {
