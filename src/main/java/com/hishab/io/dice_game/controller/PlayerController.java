@@ -52,10 +52,8 @@ public class PlayerController {
     })
     @PostMapping
     public ResponseEntity<PlayerResponse> createPlayer(@Valid @RequestBody PlayerRequest playerRequest) {
-        Player player = gameService.createPlayer(playerRequest.getName(), playerRequest.getAge());
-        PlayerResponse playerResponse = new PlayerResponse();
-        playerResponse.setName(player.getName());
-        playerResponse.setScore(player.getScore());
+        Player player = gameService.createPlayer(playerRequest.name(), playerRequest.age());
+        PlayerResponse playerResponse = new PlayerResponse(player.getName(), player.getScore());
         return new ResponseEntity<>(playerResponse, HttpStatus.CREATED);
     }
 

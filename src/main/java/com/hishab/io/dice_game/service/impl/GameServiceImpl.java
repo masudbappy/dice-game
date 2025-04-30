@@ -141,9 +141,7 @@ public class GameServiceImpl implements GameService {
     }
 
     private PlayerResponse convertToResponse(Player player) {
-        PlayerResponse response = new PlayerResponse();
-        response.setName(player.getName());
-        response.setScore(player.getScore());
+        PlayerResponse response = new PlayerResponse(player.getName(), player.getScore());
         return response;
     }
 
