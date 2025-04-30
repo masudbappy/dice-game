@@ -1,4 +1,4 @@
-#   Hishab Game Application
+#   Dice Game Application
 
 This is a simple board game application developed using Java 21 and Spring Boot 3.4.5
 
@@ -39,19 +39,21 @@ This is a simple board game application developed using Java 21 and Spring Boot 
 
 ####   Run with Docker
 
-1.  **Build the Docker image:**
+1.  **Pull Docker image**
 
     ```bash
-    docker build -t hishab-game .
+    docker pull masudbappy/dice-game
     ```
 
 2.  **Run the Docker container:**
 
     ```bash
-    docker run -p 8080:8080 hishab-game
+    docker run -d -p 8081:8081 --name dice-game masudbappy/dice-game
     ```
 
-The application will be accessible at `http://localhost:8080`.
+The application will be accessible at `http://localhost:8081`.
+##   API Documentation
+API documentation is available at `http://localhost:8081/swagger-ui.html` after the application is running.
 
 ##   API Endpoints
 
@@ -90,11 +92,6 @@ The application will be accessible at `http://localhost:8080`.
           }
         ]
         ```
-
-##   API Documentation
-
-API documentation is available at `http://localhost:8080/swagger-ui.html` after the application is running.
-
 ##   Game Rules
 
 * Maximum 4 players.
