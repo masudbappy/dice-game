@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The type Player controller.
+ * The type Game controller.
+ * This controller handles all game-related API endpoints.
  */
 @RestController
 @RequestMapping("/api/v1/dice")
@@ -39,10 +40,10 @@ public class GameController {
     }
 
     /**
-     * Create player response entity.
+     * Creates a new player and adds them to the game.
      *
-     * @param playerRequest the player request
-     * @return the response entity
+     * @param playerRequest the player request containing name and age
+     * @return the response entity containing the created player's details
      */
     @Operation(summary = "Create a new player")
     @ApiResponses(value = {
@@ -59,9 +60,9 @@ public class GameController {
     }
 
     /**
-     * Start game response entity.
+     * Starts the game if the conditions are met.
      *
-     * @return the response entity
+     * @return the response entity containing the winner's name and current scores
      */
     @Operation(summary = "Start the game")
     @ApiResponses(value = {
@@ -82,9 +83,9 @@ public class GameController {
     }
 
     /**
-     * Gets current scores.
+     * Retrieves the current scores of all players.
      *
-     * @return the current scores
+     * @return the response entity containing a list of player scores
      */
     @Operation(summary = "Get the current scores of all players")
     @ApiResponses(value = {
@@ -97,9 +98,9 @@ public class GameController {
     }
 
     /**
-     * Reset game response entity.
+     * Resets the game and clears all player states.
      *
-     * @return the response entity
+     * @return the response entity confirming the game reset
      */
     @Operation(summary = "This will reset the game and all players' scores to 0. You can start a new game after this.")
     @ApiResponses(value = {

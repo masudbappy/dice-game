@@ -38,6 +38,15 @@ public class GameServiceImpl implements GameService {
         this.diceApiClient = diceApiClient;
     }
 
+    /**
+     * Creates a new player and adds them to the game.
+     *
+     * @param name the name of the player
+     * @param age  the age of the player
+     * @return the created Player object
+     * @throws CustomException if the maximum number of players (4) is exceeded
+     *                         or if a player with the same name already exists
+     */
     @Override
     public Player createPlayer(String name, int age) {
         if (players.size() >= 4) {
@@ -54,6 +63,13 @@ public class GameServiceImpl implements GameService {
         return player;
     }
 
+    /**
+     * Starts the game if the conditions are met.
+     *
+     * @return a map containing the winner's name and the current scores
+     * @throws CustomException if there are fewer than 2 players, the game is already in progress,
+     *                         or the previous game has not been reset
+     */
     @Override
     public Map<String, Object> startGame() {
         if (players.size() < 2) {
@@ -80,6 +96,9 @@ public class GameServiceImpl implements GameService {
                 .getName(), "scores", getCurrentScores());
     }
 
+    /**
+     * Plays the game by iterating through players until a winner is found.
+     */
     private void playGame() {
         int currentPlayerIndex = 0;
         while (players.stream().noneMatch(this::hasWon)) {
@@ -93,6 +112,11 @@ public class GameServiceImpl implements GameService {
         }
     }
 
+    /**
+     * Executes a single turn for the given player.
+     *
+     * @param player the player whose turn it is
+     */
     private void playTurn(Player player) {
         int diceValue = diceApiClient.rollDice();
         logger.info("Player {} rolled a {}", player.getName(), diceValue);
@@ -134,23 +158,42 @@ public class GameServiceImpl implements GameService {
         }
     }
 
+    /**
+     * Retrieves the current scores of all players.
+     *
+     * @return a list of PlayerResponse objects containing player names and scores
+     */
     @Override
     public List<PlayerResponse> getCurrentScores() {
         return players.stream().map(this::convertToResponse).toList();
     }
 
+    /**
+     * Resets the game by clearing player states and setting the game status to not started.
+     */
     @Override
     public void resetGame() {
         players.forEach(Player::reset);
         gameStarted = false;
         logger.info("The game has been reset.");
     }
-
+    /**
+     * Converts a Player object to a PlayerResponse object.
+     *
+     * @param player the player to convert
+     * @return the PlayerResponse object
+     */
     private PlayerResponse convertToResponse(Player player) {
         PlayerResponse response = new PlayerResponse(player.getName(), player.getScore());
         return response;
     }
 
+    /**
+     * Checks if the given player has won the game.
+     *
+     * @param player the player to check
+     * @return true if the player has won, false otherwise
+     */
     private boolean hasWon(Player player) {
         return player.getScore() >= winningScore;
     }
