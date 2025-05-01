@@ -12,9 +12,10 @@ This is a simple board game application developed using Java 21 and Spring Boot 
 
 * RESTful API for player management and game operations.
 * Game logic implementing the specified rules.
+* Exception handling.
 * Logging of game events.
 * API documentation using Swagger UI.
-* Dockerization for easy deployment.
+* Deodorization for easy deployment.
 
 ##   How to Build and Run
 
@@ -113,3 +114,5 @@ API documentation is available at `http://localhost:8081/swagger-ui.html` after 
 ##   Logging
 
 The application logs game events to the console in the following format:
+2025-05-01 19:20:28.889 [http-nio-8081-exec-2] ERROR c.h.i.dice_game.client.DiceApiClient - Inner API Exception :
+I/O error on GET request for "http://developer-test.hishab.io/api/v1/roll-dice": developer-test.hishab.io
